@@ -17,7 +17,7 @@ function Gameboard(){
   const markCell = (row, col, marker) => {
     // check if cell is not marked
     const availableCells = 
-      (board[row][col].getCellMarker() !== "")? true: false;
+      (board[row][col].getCellMarker() !== "")? false: true;
 
     if(availableCells){
       board[row][col].playerMarker(marker)
@@ -60,4 +60,57 @@ function Cell(){
     playerMarker,
     getCellMarker
   };
+}
+
+// Control the game flow, current game state and the game winner
+function PlayGame(
+  playerOneName = "P1",
+  playerTwoName = "P2",
+) {
+  const board = Gameboard();
+  
+  const players = [
+    {
+      name: playerOneName,
+      marker: "x"
+    },
+    {
+      name: playerTwoName,
+      marker: "o"
+    }
+  ];
+
+  let playerTurn = players[0];
+
+  const switchPlayerTurn = () =>{
+    playerTurn = playerTurn === players[0] ? players[1]: players[0];
+  };
+
+  const getPlayerTurn = () => playerTurn;
+
+  const printNewRound = () => {
+    board.printBoard();
+    console.log(`${getPlayerTurn().name}'s turn.`);
+  };
+
+  const playRound = (col, row) => {
+    console.log(`Selecting ${getPlayerTurn().name}'s marker.`);
+    // Mark cell with player marker
+    board.markCell(col, row, getPlayerTurn().marker);
+
+    // Change player turn after player select cell
+    switchPlayerTurn();
+    printNewRound();
+  }
+
+  // Initial play game
+  printNewRound();
+
+  return{
+    playRound,
+    getPlayerTurn,
+    getBoard: board.getBoard
+
+  }
+
 }
