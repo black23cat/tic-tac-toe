@@ -39,3 +39,25 @@ function Gameboard(){
     printBoard
   }
 }
+
+/* Cell represent one "square" on the board 
+  ""  = empty cell
+  "x" = Player1 marker
+  "o" = Player2 marker
+*/
+function Cell(){
+  let marker = "";
+
+  // Accept a player's marker to change the cell marker
+  const playerMarker = (playerMarker) => {
+    marker = playerMarker;
+  };
+
+  //retrieve current value of cell with closure
+  const getCellMarker = () => marker;
+
+  return{
+    playerMarker,
+    getCellMarker
+  };
+}
