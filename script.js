@@ -15,16 +15,7 @@ function Gameboard(){
   const getBoard = () => board;
 
   const markCell = (row, col, marker) => {
-    // check if cell is not marked
-    const availableCells = 
-      (board[row][col].getCellMarker() !== "")? false: true;
-
-    if(availableCells){
-      board[row][col].playerMarker(marker)
-      return true;
-    } else { // if there's already mark on the cell, exit program with returned value
-      return false;
-    }
+    board[row][col].playerMarker(marker)
   }
 
   // Render board that have marker on cell
@@ -93,10 +84,22 @@ function PlayGame(
     console.log(`${getPlayerTurn().name}'s turn.`);
   };
 
-  const playRound = (col, row) => {
+  const playRound = (row, col) => {
     console.log(`Selecting ${getPlayerTurn().name}'s marker.`);
+    const getCurrentBoard = board.getBoard();
+    const availableCells = 
+      (getCurrentBoard[row][col].getCellMarker() === "") ? true: false;
+
+    // If selected cell already have marker, exit program
+    if(!availableCells){
+      console.log("There's already a marker.");
+      printNewRound();
+      return;
+    }
+
+    // If selected cell is available
     // Mark cell with player marker
-    board.markCell(col, row, getPlayerTurn().marker);
+    board.markCell(row, col, getPlayerTurn().marker);
 
     // Change player turn after player select cell
     switchPlayerTurn();
@@ -114,3 +117,5 @@ function PlayGame(
   }
 
 }
+
+const game = PlayGame();
