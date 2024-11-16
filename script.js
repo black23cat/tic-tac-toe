@@ -11,17 +11,27 @@ function Gameboard(){
       board[i].push(Cell());
     }
   }
-  // Render 2d board
+  // Get 2d board
   const getBoard = () => board;
 
   const markCell = (row, col, marker) => {
-    board[row][col].playerMarker(marker)
+    const availableCells = 
+      board[row][col].getCellMarker() === "" ? true: false;
+    
+    // If cell is not available, exit program
+    if(!availableCells) return false;
+
+    // If selected cell is available
+    // Mark cell with player marker
+    board[row][col].playerMarker(marker);
+    return true;
   }
 
   // Render board that have marker on cell
   const printBoard = () => {
     const boardWithCellMarker = board.map((row) => row.map((cell) => cell.getCellMarker()));
     console.log(boardWithCellMarker);
+    return boardWithCellMarker;
   };
 
   return {
@@ -86,20 +96,14 @@ function PlayGame(
 
   const playRound = (row, col) => {
     console.log(`Selecting ${getPlayerTurn().name}'s marker.`);
-    const getCurrentBoard = board.getBoard();
-    const availableCells = 
-      (getCurrentBoard[row][col].getCellMarker() === "") ? true: false;
+    const selectCell = board.markCell(row, col, getPlayerTurn().marker);
 
     // If selected cell already have marker, exit program
-    if(!availableCells){
+    if(!selectCell){
       console.log("There's already a marker.");
       printNewRound();
       return;
     }
-
-    // If selected cell is available
-    // Mark cell with player marker
-    board.markCell(row, col, getPlayerTurn().marker);
 
     // Change player turn after player select cell
     switchPlayerTurn();
