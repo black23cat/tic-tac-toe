@@ -5,39 +5,40 @@ function Gameboard(){
   //Each square on board hold Cell()
   //Expose markCell method to mark selected cell
   const board = [];
-  for(let i = 0; i < 3; i++){
-    board[i] = [];
-    for(let j = 0; j < 3; j++){
-      board[i].push(Cell());
-    }
+  const generateBoard = () => {
+    for(let i = 0; i < 9; i++){
+      board[i] = Cell();
+    }    
   }
+  generateBoard();
+
   // Get 2d board
   const getBoard = () => board;
 
-  const markCell = (row, col, marker) => {
+  const markCell = (index, marker) => {
     const availableCells = 
-      board[row][col].getCellMarker() === "" ? true: false;
+      board[index].getCellMarker() === "" ? true: false;
     
     // If cell is not available, exit program
     if(!availableCells) return false;
 
     // If selected cell is available
     // Mark cell with player marker
-    board[row][col].playerMarker(marker);
+    board[index].playerMarker(marker);
     return true;
   }
 
   // Render board that have marker on cell
   const printBoard = () => {
-    const boardWithCellMarker = board.map((row) => row.map((cell) => cell.getCellMarker()));
-    console.log(boardWithCellMarker);
+    const boardWithCellMarker = board.map((cell) => cell.getCellMarker());
     return boardWithCellMarker;
   };
 
   return {
     getBoard,
     markCell,
-    printBoard
+    printBoard,
+    resetBoard: generateBoard
   }
 }
 
@@ -73,15 +74,18 @@ function PlayGame(
   const players = [
     {
       name: playerOneName,
-      marker: "x"
+      marker: "x",
+      score: 0
     },
     {
       name: playerTwoName,
-      marker: "o"
+      marker: "o",
+      score: 0
     }
   ];
 
   let playerTurn = players[0];
+  let roundCount = 0;
 
   const switchPlayerTurn = () =>{
     playerTurn = playerTurn === players[0] ? players[1]: players[0];
@@ -91,12 +95,13 @@ function PlayGame(
 
   const printNewRound = () => {
     board.printBoard();
+    console.log(board.printBoard());
     console.log(`${getPlayerTurn().name}'s turn.`);
   };
 
-  const playRound = (row, col) => {
+  const playRound = (index) => {
     console.log(`Selecting ${getPlayerTurn().name}'s marker.`);
-    const selectCell = board.markCell(row, col, getPlayerTurn().marker);
+    const selectCell = board.markCell(index, getPlayerTurn().marker);
 
     // If selected cell already have marker, exit program
     if(!selectCell){
@@ -105,9 +110,59 @@ function PlayGame(
       return;
     }
 
+    checkWinner()
     // Change player turn after player select cell
     switchPlayerTurn();
     printNewRound();
+  }
+
+  const checkWinner = () => {
+    // Get current board state and
+    // current player marker
+    const boardState = board.printBoard();
+    const currentMarker = getPlayerTurn().marker;
+    // Get the index of current player marker
+    const markerIndex = boardState.reduce((acc, curr, index) => {
+      if(curr === currentMarker){
+        acc.push(index);
+      }
+      return acc;
+    }, []);
+
+    // Function to check if player marker match the winning condition
+    const isWinning = (arr1, arr2) => {
+      return arr2.every((el) => arr1.includes(el));
+    };
+
+    // Winning pattern
+    /* If one of the player marker match the pattern
+       That player win the round */ 
+    const winPattern = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6],
+    ];
+
+    // Check if player marker match the winning condition
+    winPattern.forEach((row) => {
+      if(isWinning(markerIndex, row)){
+        alert(`${getPlayerTurn().name} win this round.`);
+        getPlayerTurn().score++;
+        console.log(`${players[0].name} score is ${players[0].score}`);
+        console.log(`${players[1].name} score is ${players[1].score}`);
+        board.resetBoard();
+        if(getPlayerTurn().score === 3){
+          alert(`${getPlayerTurn().name} has won the game!`);
+          players.forEach(e => e.score = 0);
+          playerTurn = players[0];
+        }
+      }
+    });
   }
 
   // Initial play game
