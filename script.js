@@ -100,6 +100,7 @@ function PlayGame(
   };
 
   const playRound = (index) => {
+    console.log(roundCount);
     console.log(`Selecting ${getPlayerTurn().name}'s marker.`);
     const selectCell = board.markCell(index, getPlayerTurn().marker);
 
@@ -110,25 +111,33 @@ function PlayGame(
       return;
     }
 
-    checkWinner()
+    if(roundCount > 3) {getRoundWinner()}
+    roundCount++;
+
     // Change player turn after player select cell
     switchPlayerTurn();
     printNewRound();
   }
 
-  const checkWinner = () => {
-    // Get current board state and
+  const getRoundWinner = () => {
     // current player marker
-    const boardState = board.printBoard();
     const currentMarker = getPlayerTurn().marker;
     // Get the index of current player marker
-    const markerIndex = boardState.reduce((acc, curr, index) => {
+    const markerIndex = board.printBoard().reduce((acc, curr, index) => {
       if(curr === currentMarker){
         acc.push(index);
       }
       return acc;
     }, []);
 
+    const emptyCells = board.printBoard().reduce((acc, curr) => {
+      if(curr === ""){
+        acc.push("");
+      }
+      return acc;
+    }, []);
+
+    
     // Function to check if player marker match the winning condition
     const isWinning = (arr1, arr2) => {
       return arr2.every((el) => arr1.includes(el));
@@ -148,14 +157,17 @@ function PlayGame(
       [2, 4, 6],
     ];
 
+    console.log(markerIndex);
     // Check if player marker match the winning condition
     winPattern.forEach((row) => {
       if(isWinning(markerIndex, row)){
+        console.log(board.printBoard());
         alert(`${getPlayerTurn().name} win this round.`);
         getPlayerTurn().score++;
         console.log(`${players[0].name} score is ${players[0].score}`);
         console.log(`${players[1].name} score is ${players[1].score}`);
         board.resetBoard();
+        roundCount = 0;
         if(getPlayerTurn().score === 3){
           alert(`${getPlayerTurn().name} has won the game!`);
           players.forEach(e => e.score = 0);
@@ -163,6 +175,14 @@ function PlayGame(
         }
       }
     });
+
+    if(emptyCells.length === 0){
+      alert(`DRAW`);
+      console.log(`${players[0].name} score is ${players[0].score}`);
+      console.log(`${players[1].name} score is ${players[1].score}`);
+      board.resetBoard();
+      roundCount = 0;
+    }
   }
 
   // Initial play game
