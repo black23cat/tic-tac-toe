@@ -85,7 +85,6 @@ function PlayGame(
   ];
 
   let playerTurn = players[0];
-  let roundCount = 0;
 
   const switchPlayerTurn = () =>{
     playerTurn = playerTurn === players[0] ? players[1]: players[0];
@@ -100,7 +99,6 @@ function PlayGame(
   };
 
   const playRound = (index) => {
-    console.log(roundCount);
     console.log(`Selecting ${getPlayerTurn().name}'s marker.`);
     const selectCell = board.markCell(index, getPlayerTurn().marker);
 
@@ -111,16 +109,14 @@ function PlayGame(
       return;
     }
 
-    if(roundCount > 3) {getRoundWinner()}
-    roundCount++;
-
+    getRoundWinner();
     // Change player turn after player select cell
     switchPlayerTurn();
     printNewRound();
   }
 
   const getRoundWinner = () => {
-    // current player marker
+    // Get current player marker
     const currentMarker = getPlayerTurn().marker;
     // Get the index of current player marker
     const markerIndex = board.printBoard().reduce((acc, curr, index) => {
@@ -130,14 +126,10 @@ function PlayGame(
       return acc;
     }, []);
 
-    const emptyCells = board.printBoard().reduce((acc, curr) => {
-      if(curr === ""){
-        acc.push("");
-      }
-      return acc;
-    }, []);
+    const emptyCells = board.printBoard().filter(value => value === "");
 
-    
+    console.log(emptyCells)
+    console.log(emptyCells.length)
     // Function to check if player marker match the winning condition
     const isWinning = (arr1, arr2) => {
       return arr2.every((el) => arr1.includes(el));
@@ -157,9 +149,23 @@ function PlayGame(
       [2, 4, 6],
     ];
 
+    let winner = false;
     console.log(markerIndex);
     // Check if player marker match the winning condition
-    winPattern.forEach((row) => {
+    for(let i = 0; i < winPattern.length; i++){
+      if(isWinning(markerIndex, winPattern[i])){
+        console.log(board.printBoard());
+        alert(`${getPlayerTurn().name} win this round.`);
+        getPlayerTurn().score++;
+        console.log(`${players[0].name} score is ${players[0].score}`);
+        console.log(`${players[1].name} score is ${players[1].score}`);
+        board.resetBoard();
+        winner =  true;
+        break;
+      }
+    }
+
+    /* winPattern.forEach((row) => {
       if(isWinning(markerIndex, row)){
         console.log(board.printBoard());
         alert(`${getPlayerTurn().name} win this round.`);
@@ -167,24 +173,25 @@ function PlayGame(
         console.log(`${players[0].name} score is ${players[0].score}`);
         console.log(`${players[1].name} score is ${players[1].score}`);
         board.resetBoard();
-        roundCount = 0;
-        if(getPlayerTurn().score === 3){
-          alert(`${getPlayerTurn().name} has won the game!`);
-          players.forEach(e => e.score = 0);
-          playerTurn = players[0];
-        }
+        winner =  true;
+        return;
       }
-    });
+    }); */
 
-    if(emptyCells.length === 0){
+    if(emptyCells.length === 0 && !winner){
       alert(`DRAW`);
       console.log(`${players[0].name} score is ${players[0].score}`);
       console.log(`${players[1].name} score is ${players[1].score}`);
       board.resetBoard();
-      roundCount = 0;
+    }
+
+    if(getPlayerTurn().score === 3){
+      alert(`${getPlayerTurn().name} has won the game!`);
+      players.forEach(e => e.score = 0);
+      playerTurn = players[0];
+      board.resetBoard();
     }
   }
-
   // Initial play game
   printNewRound();
 
@@ -197,4 +204,42 @@ function PlayGame(
 
 }
 
-const game = PlayGame();
+function ScreenDisplay(){
+  const game = PlayGame();
+  const playerTurnDiv = document.querySelector(".turn");
+  const boardDiv = document.querySelector(".board");
+  const p1Score = document.querySelector(".p1-score");
+  const p2Score = document.querySelector(".p2-score");
+  
+  const updateScreen = () => {
+    boardDiv.textContent = "";
+    // p1Score.textContent = `${game.players[0].name} Score: ${game.getPlayerTurn().score}` 
+    const board = game.getBoard();
+    const activePlayer = game.getPlayerTurn();
+    console.log(`${activePlayer.name}  turn display`);
+
+    playerTurnDiv.textContent = `${activePlayer.name}'s turn...`
+    board.forEach((cell, index) => {
+      const cellBtn = document.createElement("div");
+      cellBtn.classList.add("cell");
+      cellBtn.dataset.cell = index;
+      cellBtn.textContent = cell.getCellMarker();
+      boardDiv.appendChild(cellBtn);
+    })
+  }
+
+  function clickHandlerBoard(e){
+    const selectedCell = e.target.dataset.cell;
+    console.log(selectedCell);
+    if(!selectedCell) return;
+
+    game.playRound(selectedCell);
+    updateScreen();
+  }
+
+  boardDiv.addEventListener("click", clickHandlerBoard);
+
+  updateScreen()
+}
+
+ScreenDisplay(); 
