@@ -65,10 +65,7 @@ function Cell(){
 }
 
 // Control the game flow, current game state and the game winner
-function PlayGame(
-  playerOneName = "P1",
-  playerTwoName = "P2",
-) {
+function PlayGame(playerOneName, playerTwoName){
   const board = Gameboard();
   
   const players = [
@@ -109,7 +106,10 @@ function PlayGame(
       return;
     }
 
-    getRoundWinner();
+    if(getRoundWinner()){
+      printNewRound();
+      return;
+    }
     // Change player turn after player select cell
     switchPlayerTurn();
     printNewRound();
@@ -165,19 +165,6 @@ function PlayGame(
       }
     }
 
-    /* winPattern.forEach((row) => {
-      if(isWinning(markerIndex, row)){
-        console.log(board.printBoard());
-        alert(`${getPlayerTurn().name} win this round.`);
-        getPlayerTurn().score++;
-        console.log(`${players[0].name} score is ${players[0].score}`);
-        console.log(`${players[1].name} score is ${players[1].score}`);
-        board.resetBoard();
-        winner =  true;
-        return;
-      }
-    }); */
-
     if(emptyCells.length === 0 && !winner){
       alert(`DRAW`);
       console.log(`${players[0].name} score is ${players[0].score}`);
@@ -190,56 +177,93 @@ function PlayGame(
       players.forEach(e => e.score = 0);
       playerTurn = players[0];
       board.resetBoard();
+      return winner;
     }
   }
+
+  const getPlayerName = () => players.map(el => el.name);
+  const getPlayerScore = () => players.map(el => el.score);
   // Initial play game
   printNewRound();
 
   return{
     playRound,
     getPlayerTurn,
-    getBoard: board.getBoard
+    getBoard: board.getBoard,
+    getPlayerName,
+    getPlayerScore
 
   }
-
 }
 
 function ScreenDisplay(){
-  const game = PlayGame();
-  const playerTurnDiv = document.querySelector(".turn");
-  const boardDiv = document.querySelector(".board");
-  const p1Score = document.querySelector(".p1-score");
-  const p2Score = document.querySelector(".p2-score");
+  function startGame(){
+    const form = document.querySelector("form");
+    const startBtn = document.querySelector("#start-game");
+    startBtn.addEventListener("click", startClickHandler);
   
-  const updateScreen = () => {
-    boardDiv.textContent = "";
-    // p1Score.textContent = `${game.players[0].name} Score: ${game.getPlayerTurn().score}` 
-    const board = game.getBoard();
-    const activePlayer = game.getPlayerTurn();
-    console.log(`${activePlayer.name}  turn display`);
-
-    playerTurnDiv.textContent = `${activePlayer.name}'s turn...`
-    board.forEach((cell, index) => {
-      const cellBtn = document.createElement("div");
-      cellBtn.classList.add("cell");
-      cellBtn.dataset.cell = index;
-      cellBtn.textContent = cell.getCellMarker();
-      boardDiv.appendChild(cellBtn);
-    })
+    function startClickHandler(){
+      let playerOneName = document.querySelector("#player-one").value;
+      let playerTwoName = document.querySelector("#player-two").value;
+      if(playerOneName === "") playerOneName = "Player One";
+      if(playerTwoName === "") playerTwoName = "Player Two";
+      form.style.display = "none";
+      renderScreen(playerOneName, playerTwoName);
+    }
   }
 
-  function clickHandlerBoard(e){
-    const selectedCell = e.target.dataset.cell;
-    console.log(selectedCell);
-    if(!selectedCell) return;
+  startGame();
 
-    game.playRound(selectedCell);
+  function renderScreen(p1, p2){  
+    const game = PlayGame(p1, p2);
+    const playerTurnDiv = document.querySelector(".turn");
+    const boardDiv = document.querySelector(".board");
+    const p1Score = document.querySelector(".p1-score");
+    const p2Score = document.querySelector(".p2-score");
+    boardDiv.style.backgroundColor = "black"
+    
+    const updateScreen = () => {
+      boardDiv.textContent = "";
+      p1Score.textContent = `${game.getPlayerName()[0]} Score :  ${game.getPlayerScore()[0]}` ;
+      p2Score.textContent = `${game.getPlayerName()[1]} Score :  ${game.getPlayerScore()[1]}` ;
+      const board = game.getBoard();
+      const activePlayer = game.getPlayerTurn();
+      console.log(`${activePlayer.name} (${activePlayer.marker}) turn display`);
+
+      function colorHover(e){
+        activePlayer.marker === "x" ? 
+        e.target.style.backgroundColor = "rgb(191, 236, 255)": 
+        e.target.style.backgroundColor = "rgb(255, 204, 234)";
+      }
+
+      function resetBgColor(e){
+        e.target.style.backgroundColor = "white";
+      }
+
+      playerTurnDiv.textContent = `${activePlayer.name}'s (${activePlayer.marker.toUpperCase()}) turn...`;
+      board.forEach((cell, index) => {
+        const cellBtn = document.createElement("div");
+        cellBtn.classList.add("cell");
+        cellBtn.dataset.cell = index;
+        cellBtn.textContent = cell.getCellMarker().toUpperCase();
+        cellBtn.addEventListener("mouseover", colorHover);
+        cellBtn.addEventListener("mouseout", resetBgColor);
+        boardDiv.appendChild(cellBtn);
+      });
+    }
+
+    function clickHandlerBoard(e){
+      const selectedCell = e.target.dataset.cell;
+      console.log(selectedCell);
+      if(!selectedCell) return;
+
+      game.playRound(selectedCell);
+      updateScreen();
+    }
+
+    boardDiv.addEventListener("click", clickHandlerBoard);
+
     updateScreen();
   }
-
-  boardDiv.addEventListener("click", clickHandlerBoard);
-
-  updateScreen()
 }
-
-ScreenDisplay(); 
+ScreenDisplay();
