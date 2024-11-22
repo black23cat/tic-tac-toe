@@ -1,16 +1,30 @@
 body{
+  text-align: center;
+}
 
+.turn{
+  font: 2rem sans-serif;
+  margin: 20px;
+}
+
+.board-container{
+  display: flex;
+  justify-content: space-around;
+  align-content: center;
 }
 
 .board{
   display: grid;
-  grid-template-columns: 200px 200px 200px;
-  grid-template-rows: 200px 200px 200px;
+  grid-template-columns: repeat(3, 150px);
+  grid-template-rows: repeat(3, 150px);
+  gap: 7px;
+  width: 450px;
+  height: 450px;
+  /* background-color: black; */
 }
 
 .cell{
   background-color: white;
-  border: 1px solid black;
   display: flex;
   align-items: center;
   justify-content: center;
