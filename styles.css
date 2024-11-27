@@ -30,13 +30,15 @@ input[type = "text"]{
 }
 
 .turn{
+  width: 100%;
   font-size: 2rem;
   font-weight: 600;
   margin: 35px auto;
 }
 
 .board-container{
-  display: flex;
+  display: none;
+  flex-wrap: wrap;
   justify-content: space-around;
   align-content: center;
 }
