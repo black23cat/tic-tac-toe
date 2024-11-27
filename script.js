@@ -16,16 +16,8 @@ function Gameboard(){
   const getBoard = () => board;
 
   const markCell = (index, marker) => {
-    const availableCells = 
-      board[index].getCellMarker() === "" ? true: false;
-    
-    // If cell is not available, exit program
-    if(!availableCells) return false;
-
-    // If selected cell is available
     // Mark cell with player marker
     board[index].playerMarker(marker);
-    return true;
   }
 
   // Render board that have marker on cell
@@ -96,28 +88,25 @@ function PlayGame(playerOneName, playerTwoName){
   };
 
   const playRound = (index) => {
-    console.log(`Selecting ${getPlayerTurn().name}'s marker.`);
-    const selectCell = board.markCell(index, getPlayerTurn().marker);
-
+    // Check for empty cell
     // If selected cell already have marker, exit program
-    if(!selectCell){
-      console.log("There's already a marker.");
+    if(board.getBoard()[index].getCellMarker() !== ""){
       printNewRound();
       return;
-    }
-
+    } else {
+    board.markCell(index, getPlayerTurn().marker);
     if(getRoundWinner()){
-      printNewRound();
       return;
+    } else {
+      switchPlayerTurn();
+      printNewRound();
+      }
     }
-    // Change player turn after player select cell
-    switchPlayerTurn();
-    printNewRound();
   }
 
   const getRoundWinner = () => {
-    // Get current player marker
     const currentMarker = getPlayerTurn().marker;
+
     // Get the index of current player marker
     const markerIndex = board.printBoard().reduce((acc, curr, index) => {
       if(curr === currentMarker){
@@ -128,9 +117,6 @@ function PlayGame(playerOneName, playerTwoName){
 
     const emptyCells = board.printBoard().filter(value => value === "");
 
-    console.log(emptyCells)
-    console.log(emptyCells.length)
-    // Function to check if player marker match the winning condition
     const isWinning = (arr1, arr2) => {
       return arr2.every((el) => arr1.includes(el));
     };
@@ -165,6 +151,7 @@ function PlayGame(playerOneName, playerTwoName){
       }
     }
 
+    // check for draw condition
     if(emptyCells.length === 0 && !winner){
       alert(`DRAW`);
       console.log(`${players[0].name} score is ${players[0].score}`);
@@ -172,6 +159,7 @@ function PlayGame(playerOneName, playerTwoName){
       board.resetBoard();
     }
 
+    // check for overall game winner
     if(getPlayerTurn().score === 3){
       alert(`${getPlayerTurn().name} has won the game!`);
       players.forEach(e => e.score = 0);
@@ -181,6 +169,7 @@ function PlayGame(playerOneName, playerTwoName){
     }
   }
 
+  // Get player name and score for ui
   const getPlayerName = () => players.map(el => el.name);
   const getPlayerScore = () => players.map(el => el.score);
   // Initial play game
@@ -197,30 +186,40 @@ function PlayGame(playerOneName, playerTwoName){
 }
 
 function ScreenDisplay(){
+  startGame();
   function startGame(){
     const form = document.querySelector("form");
     const startBtn = document.querySelector("#start-game");
     startBtn.addEventListener("click", startClickHandler);
   
     function startClickHandler(){
-      let playerOneName = document.querySelector("#player-one").value;
-      let playerTwoName = document.querySelector("#player-two").value;
+      let playerOneName = form.querySelector("#player-one").value;
+      let playerTwoName = form.querySelector("#player-two").value;
       if(playerOneName === "") playerOneName = "Player One";
       if(playerTwoName === "") playerTwoName = "Player Two";
+      const resetBtn = document.createElement("button");
+      resetBtn.textContent = "Reset All";
+      resetBtn.addEventListener("click", resetGame);
+      document.querySelector("body").appendChild(resetBtn);
+
       form.style.display = "none";
       renderScreen(playerOneName, playerTwoName);
     }
-  }
 
-  startGame();
+    function resetGame(){
+      location.reload();
+    }
+  }
 
   function renderScreen(p1, p2){  
     const game = PlayGame(p1, p2);
-    const playerTurnDiv = document.querySelector(".turn");
+    const boardContainer = document.querySelector(".board-container");
     const boardDiv = document.querySelector(".board");
+    const playerTurnDiv = document.querySelector(".turn");
     const p1Score = document.querySelector(".p1-score");
     const p2Score = document.querySelector(".p2-score");
-    boardDiv.style.backgroundColor = "black"
+    boardDiv.style.backgroundColor = "black";
+    boardContainer.style.display = "flex";
     
     const updateScreen = () => {
       boardDiv.textContent = "";
@@ -228,7 +227,6 @@ function ScreenDisplay(){
       p2Score.textContent = `${game.getPlayerName()[1]} Score :  ${game.getPlayerScore()[1]}` ;
       const board = game.getBoard();
       const activePlayer = game.getPlayerTurn();
-      console.log(`${activePlayer.name} (${activePlayer.marker}) turn display`);
 
       function colorHover(e){
         activePlayer.marker === "x" ? 
@@ -266,4 +264,5 @@ function ScreenDisplay(){
     updateScreen();
   }
 }
+
 ScreenDisplay();
