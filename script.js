@@ -189,9 +189,9 @@ function PlayGame(playerOneName, playerTwoName){
 }
 
 function ScreenDisplay(){
+  const form = document.querySelector("form");
   startGame();
   function startGame(){
-    const form = document.querySelector("form");
     const startBtn = document.querySelector("#start-game");
     startBtn.addEventListener("click", startClickHandler);
   
@@ -200,17 +200,9 @@ function ScreenDisplay(){
       let playerTwoName = form.querySelector("#player-two").value;
       if(playerOneName === "") playerOneName = "Player One";
       if(playerTwoName === "") playerTwoName = "Player Two";
-      const resetBtn = document.createElement("button");
-      resetBtn.textContent = "Reset All";
-      resetBtn.addEventListener("click", resetGame);
-      document.querySelector("body").appendChild(resetBtn);
-
       form.style.display = "none";
+      form.reset();
       renderScreen(playerOneName, playerTwoName);
-    }
-
-    function resetGame(){
-      location.reload();
     }
   }
 
@@ -253,16 +245,28 @@ function ScreenDisplay(){
       });
     }
 
+    boardDiv.addEventListener("click", clickHandlerBoard);
     function clickHandlerBoard(e){
       const selectedCell = e.target.dataset.cell;
       console.log(selectedCell);
       if(!selectedCell) return;
-
       game.playRound(selectedCell);
       updateScreen();
     }
 
-    boardDiv.addEventListener("click", clickHandlerBoard);
+    const body = document.querySelector("body");
+    const resetBtn = document.createElement("button");
+    resetBtn.textContent = "Reset All";
+    resetBtn.addEventListener("click", resetGame);
+    body.appendChild(resetBtn);
+
+    function resetGame(){
+      boardDiv.textContent = "";
+      boardContainer.style.display = "none";
+      form.style.display = "block";
+      boardDiv.removeEventListener("click", clickHandlerBoard);
+      body.removeChild(resetBtn);      
+    }
 
     updateScreen();
   }
