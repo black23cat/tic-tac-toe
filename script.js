@@ -105,8 +105,9 @@ function PlayGame(playerOneName, playerTwoName){
   }
 
   const getRoundWinner = () => {
+    const dialogModal = document.querySelector("dialog");
+    const dialogPara = document.querySelector(".dialog-para");
     const currentMarker = getPlayerTurn().marker;
-
     // Get the index of current player marker
     const markerIndex = board.printBoard().reduce((acc, curr, index) => {
       if(curr === currentMarker){
@@ -136,12 +137,12 @@ function PlayGame(playerOneName, playerTwoName){
     ];
 
     let winner = false;
-    console.log(markerIndex);
     // Check if player marker match the winning condition
     for(let i = 0; i < winPattern.length; i++){
       if(isWinning(markerIndex, winPattern[i])){
+        dialogModal.showModal();
+        dialogPara.textContent = `${getPlayerTurn().name}(${getPlayerTurn().marker.toUpperCase()}) win this round.`;
         console.log(board.printBoard());
-        alert(`${getPlayerTurn().name} win this round.`);
         getPlayerTurn().score++;
         console.log(`${players[0].name} score is ${players[0].score}`);
         console.log(`${players[1].name} score is ${players[1].score}`);
@@ -153,7 +154,8 @@ function PlayGame(playerOneName, playerTwoName){
 
     // check for draw condition
     if(emptyCells.length === 0 && !winner){
-      alert(`DRAW`);
+      dialogModal.showModal();
+      dialogPara.textContent = `ROUND DRAW`;
       console.log(`${players[0].name} score is ${players[0].score}`);
       console.log(`${players[1].name} score is ${players[1].score}`);
       board.resetBoard();
@@ -161,7 +163,8 @@ function PlayGame(playerOneName, playerTwoName){
 
     // check for overall game winner
     if(getPlayerTurn().score === 3){
-      alert(`${getPlayerTurn().name} has won the game!`);
+      dialogModal.showModal();
+      dialogPara.textContent = `Congratulations, ${getPlayerTurn().name}'s (${getPlayerTurn().marker.toUpperCase()}) is the game WINNER.`;
       players.forEach(e => e.score = 0);
       playerTurn = players[0];
       board.resetBoard();
